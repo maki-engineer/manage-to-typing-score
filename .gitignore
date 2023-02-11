@@ -1,1 +1,5 @@
+node_modules
 file_path.json
+package-lock.json
+typing_score.db
+data.xlsx
