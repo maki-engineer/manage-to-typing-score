@@ -125,3 +125,7 @@ fs.readdir("E:/タイプウェル国語R/JR全履歴", (err, files) => {
     });
   }
 });
+
+setTimeout(() => {
+  return;
+}, 5_000);

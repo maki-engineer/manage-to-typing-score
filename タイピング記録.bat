@@ -8,5 +8,3 @@ cd %~dp0
 node regist
 
 echo.
-
-pause
