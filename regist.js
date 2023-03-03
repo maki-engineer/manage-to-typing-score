@@ -73,19 +73,20 @@ fs.readdir("E:/タイプウェル国語R/JR全履歴", (err, files) => {
 
               // テーブルにデータ追加
               db.run("insert into scores(date, wpm, miss, score) values(?, ?, ?, ?)", today, highScores[0], highScores[1], highScores[2]);
+
+              // 上書き保存
+              workbook.toFileAsync("data.xlsx").then(result => {
+                console.log("タイピングのスコアをエクセルとテーブルに記録しました！");
+              });
+
+              setTimeout(() => {
+                return;
+              }, 5_000);
+
               break;
             }
           }
-        
-          // 上書き保存
-          workbook.toFileAsync("data.xlsx").then(result => {
-            console.log("タイピングのスコアをエクセルとテーブルに記録しました！");
-          });
         });
-
-        setTimeout(() => {
-          return;
-        }, 5_000);
       }
   });
 });
