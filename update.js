@@ -1,5 +1,5 @@
 "use strict";
-// 打／秒とミス数を受け取って、スコアをエクセルとテーブルに更新する。
+// 打／秒とミス数を受け取って、スコアをエクセルとテーブルに更新する。その日のデータがない場合は、新しく記録する。
 
 // SQLite3導入
 const sqlite3 = require("sqlite3");
@@ -43,26 +43,52 @@ reader.on("line", input => {
     let rowIndex = 3;
   
     while(true){
-      if(workbook.sheet("タイピング").cell("B" + String(rowIndex)).value() === today){
-        // 更新(row_index の行に結果を記録)
+      if(workbook.sheet("タイピング").cell("B" + String(rowIndex)).value()){
+        if(workbook.sheet("タイピング").cell("B" + String(rowIndex)).value() === today){
+          // 更新(row_index の行に結果を記録)
+          workbook.sheet("タイピング").cell("B" + String(rowIndex)).value(today);
+          workbook.sheet("タイピング").cell("C" + String(rowIndex)).value(wpmAndScore[0]);
+          workbook.sheet("タイピング").cell("D" + String(rowIndex)).value(miss);
+          workbook.sheet("タイピング").cell("E" + String(rowIndex)).value(wpmAndScore[1]);
+    
+          // データを更新
+          db.run("update scores set wpm = ?, miss = ?, score = ? where date = ?", wpmAndScore[0], miss, wpmAndScore[1], today);
+
+          // 上書き保存
+          workbook.toFileAsync("data.xlsx").then(result => {
+            console.log("タイピングのスコアをエクセルとテーブルに更新しました！");
+          });
+
+          setTimeout(() => {
+            return;
+          }, 5_000);
+  
+          break;
+        }else{
+          rowIndex++;
+        }
+      }else{
+        // 新しくデータを記録
         workbook.sheet("タイピング").cell("B" + String(rowIndex)).value(today);
         workbook.sheet("タイピング").cell("C" + String(rowIndex)).value(wpmAndScore[0]);
         workbook.sheet("タイピング").cell("D" + String(rowIndex)).value(miss);
         workbook.sheet("タイピング").cell("E" + String(rowIndex)).value(wpmAndScore[1]);
-  
-        // データを更新
-        db.run("update scores set wpm = ?, miss = ?, score = ? where date = ?", wpmAndScore[0], miss, wpmAndScore[1], today);
+
+        // テーブルにデータ追加
+        db.run("insert into scores(date, wpm, miss, score) values(?, ?, ?, ?)", today, wpmAndScore[0], miss, wpmAndScore[1]);
+
+        // 上書き保存
+        workbook.toFileAsync("data.xlsx").then(result => {
+          console.log("新しくjタイピングのスコアをエクセルとテーブルに記録しました！");
+        });
+
+        setTimeout(() => {
+          return;
+        }, 5_000);
 
         break;
-      }else{
-        rowIndex++;
       }
     }
-  
-    // 上書き保存
-    workbook.toFileAsync("data.xlsx").then(result => {
-      console.log("タイピングのスコアをエクセルとテーブルに更新しました！");
-    });
   });
 
   reader.close();
